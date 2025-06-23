@@ -135,6 +135,12 @@ page AccountPage {
   component: import Account from "@src/user/AccountPage"
 }
 
+route KycRoute { path: "/kyc", to: KycPage }
+page KycPage {
+  authRequired: true,
+  component: import KycPage from "@src/user/KycPage"
+}
+
 query getPaginatedUsers {
   fn: import { getPaginatedUsers } from "@src/user/operations",
   entities: [User]
@@ -142,6 +148,16 @@ query getPaginatedUsers {
 
 action updateIsUserAdminById {
   fn: import { updateIsUserAdminById } from "@src/user/operations",
+  entities: [User]
+}
+
+action submitKycInfo {
+  fn: import { submitKycInfo } from "@src/user/operations",
+  entities: [User, File] // File entity might be needed if linking files directly in action
+}
+
+action reviewKycSubmission {
+  fn: import { reviewKycSubmission } from "@src/server/adminOperations", // New path
   entities: [User]
 }
 //#endregion

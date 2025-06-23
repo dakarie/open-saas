@@ -4,17 +4,23 @@ import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE_BYTES } from './validation';
 
 export type FileWithValidType = Omit<File, 'type'> & { type: AllowedFileType };
 type AllowedFileType = (typeof ALLOWED_FILE_TYPES)[number];
-interface FileUploadProgress {
+interface FileUploadProgressOptions {
   file: FileWithValidType;
+  purpose?: string; // Added purpose
   setUploadProgressPercent: (percentage: number) => void;
 }
 
-export async function uploadFileWithProgress({ file, setUploadProgressPercent }: FileUploadProgress) {
-  const { s3UploadUrl, s3UploadFields } = await createFile({ fileType: file.type, fileName: file.name });
+export async function uploadFileWithProgress({ file, purpose, setUploadProgressPercent }: FileUploadProgressOptions) {
+  // Now createFile returns s3UploadUrl, s3UploadFields, and fileId
+  const { s3UploadUrl, s3UploadFields, fileId } = await createFile({
+    fileType: file.type,
+    fileName: file.name,
+    purpose: purpose
+  });
 
   const formData = getFileUploadFormData(file, s3UploadFields);
 
-  return axios.post(s3UploadUrl, formData, {
+  await axios.post(s3UploadUrl, formData, {
     onUploadProgress: (progressEvent) => {
       if (progressEvent.total) {
         const percentage = Math.round((progressEvent.loaded / progressEvent.total) * 100);
@@ -22,6 +28,7 @@ export async function uploadFileWithProgress({ file, setUploadProgressPercent }:
       }
     },
   });
+  return fileId; // Return the fileId
 }
 
 function getFileUploadFormData(file: File, s3UploadFields: Record<string, string>) {

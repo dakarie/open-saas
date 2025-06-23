@@ -14,6 +14,7 @@ import { ALLOWED_FILE_TYPES } from './validation';
 const createFileInputSchema = z.object({
   fileType: z.enum(ALLOWED_FILE_TYPES),
   fileName: z.string().nonempty(),
+  purpose: z.string().optional(), // Added purpose, optional for backward compatibility if needed
 });
 
 type CreateFileInput = z.infer<typeof createFileInputSchema>;
@@ -43,6 +44,7 @@ export const createFile: CreateFile<
       key,
       uploadUrl: s3UploadUrl,
       type: fileType,
+      purpose: rawArgs.purpose, // Using rawArgs as purpose is optional in schema for now
       user: { connect: { id: context.user.id } },
     },
   });
@@ -50,6 +52,7 @@ export const createFile: CreateFile<
   return {
     s3UploadUrl,
     s3UploadFields,
+    fileId: newFile.id, // Return the ID of the newly created file record
   };
 };
 

@@ -22,6 +22,28 @@ model User {
   datePaid                  DateTime?
   credits                   Int             @default(3)
 
+  // KYC Fields
+  kycStatus                 String?    // e.g., "none", "pending_review", "verified", "rejected", "resubmit_required"
+  kycSubmittedAt            DateTime?
+  kycReviewedAt             DateTime?
+  kycReviewNotes            String?
+
+  fullName                  String?
+  dateOfBirth               DateTime?
+  addressStreet             String?
+  addressCity               String?
+  addressState              String?
+  addressPostalCode         String?
+  addressCountry            String?
+
+  documentType              String?    // e.g., "passport", "national_id", "drivers_license"
+  documentIdNumber          String?
+  documentIssuingCountry    String?
+  documentExpiryDate        DateTime?
+
+  interpreterPhoneNumber    String?   // Assigned phone number for the AI interpreter service
+  preferredLanguage         String?   // User's chosen language for interpretation
+
   gptResponses              GptResponse[]
   contactFormMessages       ContactFormMessage[]
   tasks                     Task[]
@@ -62,6 +84,7 @@ model File {
   type                      String
   key                       String
   uploadUrl                 String
+  purpose                   String? // e.g., "kyc_document_front", "kyc_document_back", "profile_picture"
 }
 
 model DailyStats {
