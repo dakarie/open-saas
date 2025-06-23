@@ -30,16 +30,43 @@ function generateMockUserData(): MockUserData {
   const timePaid = faker.date.between({ from: createdAt, to: now });
   const credits = subscriptionStatus ? 0 : faker.number.int({ min: 0, max: 10 });
   const hasUserPaidOnStripe = !!subscriptionStatus || credits > 3;
+  const kycStatuses = ["none", "pending_review", "verified", "rejected", "resubmit_required", null];
+  const kycStatus = faker.helpers.arrayElement(kycStatuses);
+  const kycSubmittedAt = kycStatus && kycStatus !== "none" ? faker.date.past({ refDate: now }) : null;
+  const kycReviewedAt = kycStatus === "verified" || kycStatus === "rejected" ? faker.date.between({ from: kycSubmittedAt || createdAt, to: now }) : null;
+
   return {
     email: faker.internet.email({ firstName, lastName }),
     username: faker.internet.userName({ firstName, lastName }),
     createdAt,
-    isAdmin: false,
+    isAdmin: faker.datatype.boolean(0.1), // 10% chance of being an admin
     credits,
     subscriptionStatus,
     lemonSqueezyCustomerPortalUrl: null,
     paymentProcessorUserId: hasUserPaidOnStripe ? `cus_test_${faker.string.uuid()}` : null,
     datePaid: hasUserPaidOnStripe ? faker.date.between({ from: createdAt, to: timePaid }) : null,
     subscriptionPlan: subscriptionStatus ? faker.helpers.arrayElement(getSubscriptionPaymentPlanIds()) : null,
+
+    // KYC Fields
+    kycStatus: kycStatus,
+    kycSubmittedAt: kycSubmittedAt,
+    kycReviewedAt: kycReviewedAt,
+    kycReviewNotes: kycStatus === "rejected" || kycStatus === "resubmit_required" ? faker.lorem.sentence() : null,
+
+    fullName: `${firstName} ${lastName}`,
+    dateOfBirth: faker.date.birthdate({ min: 18, max: 65, mode: 'age' }),
+    addressStreet: faker.location.streetAddress(),
+    addressCity: faker.location.city(),
+    addressState: faker.location.state({ abbreviated: true }),
+    addressPostalCode: faker.location.zipCode(),
+    addressCountry: faker.location.countryCode('alpha-2'),
+
+    documentType: kycStatus && kycStatus !== "none" ? faker.helpers.arrayElement(["passport", "national_id", "drivers_license", null]) : null,
+    documentIdNumber: kycStatus && kycStatus !== "none" ? faker.string.alphanumeric(10).toUpperCase() : null,
+    documentIssuingCountry: kycStatus && kycStatus !== "none" ? faker.location.countryCode('alpha-2') : null,
+    documentExpiryDate: kycStatus && kycStatus !== "none" ? faker.date.future({ years: 5 }) : null,
+
+    interpreterPhoneNumber: faker.helpers.arrayElement([faker.phone.number(), null]),
+    preferredLanguage: faker.helpers.arrayElement(['en', 'es', 'fr', null]),
   };
 }

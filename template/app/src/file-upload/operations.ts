@@ -24,6 +24,7 @@ export const createFile: CreateFile<
   {
     s3UploadUrl: string;
     s3UploadFields: Record<string, string>;
+    fileId: string; // Added fileId to the return type
   }
 > = async (rawArgs, context) => {
   if (!context.user) {
@@ -38,7 +39,7 @@ export const createFile: CreateFile<
     userId: context.user.id,
   });
 
-  await context.entities.File.create({
+  const newFile = await context.entities.File.create({
     data: {
       name: fileName,
       key,

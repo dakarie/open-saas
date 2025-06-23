@@ -48,16 +48,22 @@ export default function DemoAppPage() {
   useEffect(() => {
     if (yourLanguage === theirLanguage) {
       // Find the first language that is not 'yourLanguage' and set it as 'theirLanguage'
-      const newTheirLanguage = SUPPORTED_LANGUAGES.find(lang => lang.code !== yourLanguage);
-      if (newTheirLanguage) {
-        setTheirLanguage(newTheirLanguage.code);
+      const newTheirLanguageObj = SUPPORTED_LANGUAGES.find(lang => lang.code !== yourLanguage);
+      if (newTheirLanguageObj) {
+        setTheirLanguage(newTheirLanguageObj.code);
       } else if (SUPPORTED_LANGUAGES.length > 1) {
         // Fallback if somehow all languages are the same (should not happen with a diverse list)
         // Or if yourLanguage was the last in a list of 2 and they became same.
-        setTheirLanguage(SUPPORTED_LANGUAGES.find(lang => lang.code !== yourLanguage) || SUPPORTED_LANGUAGES[0].code);
+        // Try to find another language, or default to the first one if no other distinct language is found.
+        const fallbackLangObj = SUPPORTED_LANGUAGES.find(lang => lang.code !== yourLanguage);
+        if (fallbackLangObj) {
+          setTheirLanguage(fallbackLangObj.code);
+        } else if (SUPPORTED_LANGUAGES.length > 0) { // Ensure SUPPORTED_LANGUAGES is not empty
+          setTheirLanguage(SUPPORTED_LANGUAGES[0].code);
+        }
       }
     }
-  }, [yourLanguage, theirLanguage]);
+  }, [yourLanguage, theirLanguage, setTheirLanguage]);
 
 
   return (

@@ -7,6 +7,7 @@
     "@aws-sdk/s3-request-presigner": "^3.523.0",
     "@google-analytics/data": "4.1.0",
     "@headlessui/react": "1.7.13",
+    "@heroicons/react": "^2.0.18",
     "@lemonsqueezy/lemonsqueezy.js": "^3.2.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tailwindcss/typography": "^0.5.7",
