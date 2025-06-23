@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, routes } from 'wasp/client/router'; // Replaced useHistory with useNavigate
+import { useNavigate } from 'react-router-dom'; // Correct import for useNavigate
+import { routes } from 'wasp/client/router'; // Keep for route definitions
 import { submitKycInfo } from 'wasp/client/operations';
 import KycStep1_PersonalInfo from './kyc/KycStep1_PersonalInfo';
 import KycStep2_DocumentInfo from './kyc/KycStep2_DocumentInfo';
@@ -26,7 +27,7 @@ export type KycFormData = {
 };
 
 export default function KycPage() {
-  const navigate = useNavigate(); // Replaced useHistory with useNavigate
+  const navigate = useNavigate(); // Use the imported useNavigate
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<KycFormData>({});
 
@@ -66,7 +67,7 @@ export default function KycPage() {
 
       await submitKycInfo(payload);
       alert('KYC information submitted successfully! You will be redirected.');
-      navigate(routes.DemoAppRoute.to); // Replaced history.push with navigate
+      navigate(routes.DemoAppRoute.to); // Use navigate
     } catch (error: any) {
       console.error('Error submitting KYC info:', error);
       alert('Error submitting KYC information: ' + (error.message || 'Unknown error'));
