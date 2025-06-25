@@ -83,6 +83,12 @@ export const submitKycInfo: SubmitKycInfo<KycInfoInput, User> = async (rawArgs, 
     }
   }
 
+  // Generate a random 10-digit phone number
+  let dummyPhoneNumber = '';
+  for (let i = 0; i < 10; i++) {
+    dummyPhoneNumber += Math.floor(Math.random() * 10);
+  }
+
   const updatedUser = await context.entities.User.update({
     where: { id: context.user.id },
     data: {
@@ -99,6 +105,7 @@ export const submitKycInfo: SubmitKycInfo<KycInfoInput, User> = async (rawArgs, 
       documentExpiryDate: expiryDate,
       kycStatus: 'pending_review', // Set status to pending
       kycSubmittedAt: new Date(),
+      interpreterPhoneNumber: dummyPhoneNumber, // Assign generated phone number
       // Note: Linking files (documentFrontFileId, documentBackFileId) to the User model
       // directly via relation fields like `kycDocumentFront: { connect: { id: args.documentFrontFileId } }`
       // would require those relations to be defined in schema.prisma.
