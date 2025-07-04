@@ -110,35 +110,90 @@ export default function KycStep3_DocumentUpload({ initialData, onNext, onBack }:
     });
   };
 
-  const inputClass = "mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400";
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300";
+  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1";
+
+  // Helper component for the file upload area
+  const FileUploadArea = ({
+    id,
+    label,
+    currentFile,
+    currentFileId,
+    progress,
+    onFileChange,
+    accept,
+    helpText,
+    uploadedTextPrefix = "Uploaded ID" // Default changed for brevity
+  }: {
+    id: string;
+    label: string;
+    currentFile: File | null;
+    currentFileId: string;
+    progress: number;
+    onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
+    accept: string;
+    helpText: string;
+    uploadedTextPrefix?: string;
+  }) => (
+    <div>
+      <label htmlFor={id} className={labelClass}>{label}</label>
+      <div className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md ${currentFile || currentFileId ? 'border-blue-500 dark:border-blue-400' : ''}`}>
+        <div className="space-y-1 text-center">
+          {/* Icon - you can use an SVG here */}
+          <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <div className="flex text-sm text-gray-600 dark:text-gray-400">
+            <label htmlFor={id} className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 dark:focus-within:ring-offset-gray-800 focus-within:ring-blue-500">
+              <span>Upload a file</span>
+              <input id={id} name={id} type="file" className="sr-only" onChange={onFileChange} accept={accept} />
+            </label>
+            <p className="pl-1">or drag and drop</p>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-500">{helpText}</p>
+          {currentFile && <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">Selected: {currentFile.name}</p>}
+        </div>
+      </div>
+      {progress > 0 && <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"><div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div></div>}
+      {currentFileId && !currentFile && <p className="text-sm text-green-600 dark:text-green-400 mt-1">{uploadedTextPrefix}: {currentFileId.substring(0, 20)}...</p>}
+    </div>
+  );
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && <div className="text-red-500 bg-red-100 p-3 rounded">{error}</div>}
+    <form onSubmit={handleSubmit} className="space-y-8"> {/* Increased space-y */}
+      {error && <div className="text-red-500 bg-red-100 dark:bg-red-900 dark:text-red-200 p-3 rounded-md">{error}</div>}
 
-      <div>
-        <label htmlFor="documentFront" className={labelClass}>Document Front</label>
-        <input type="file" name="documentFront" id="documentFront" onChange={(e) => handleFileChange(e, 'front')} className={inputClass} accept={ALLOWED_FILE_TYPES_FOR_KYC.join(',')} />
-        {uploadProgressFront > 0 && <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"><div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${uploadProgressFront}%` }}></div></div>}
-        {documentFrontFileId && !documentFrontFile && <p className="text-sm text-green-600 mt-1">Front document uploaded: {documentFrontFileId}</p>}
-      </div>
+      <FileUploadArea
+        id="documentFront"
+        label="Document Front"
+        currentFile={documentFrontFile}
+        currentFileId={documentFrontFileId}
+        progress={uploadProgressFront}
+        onFileChange={(e) => handleFileChange(e, 'front')}
+        accept={ALLOWED_FILE_TYPES_FOR_KYC.join(',')}
+        helpText={`PNG, JPG, PDF up to ${MAX_FILE_SIZE_MB}MB.`}
+         uploadedTextPrefix="Front Document ID"
+      />
 
-      <div>
-        <label htmlFor="documentBack" className={labelClass}>Document Back (Optional, e.g., for ID cards)</label>
-        <input type="file" name="documentBack" id="documentBack" onChange={(e) => handleFileChange(e, 'back')} className={inputClass} accept={ALLOWED_FILE_TYPES_FOR_KYC.join(',')} />
-        {uploadProgressBack > 0 && <div className="mt-2 w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700"><div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: `${uploadProgressBack}%` }}></div></div>}
-        {documentBackFileId && !documentBackFile && <p className="text-sm text-green-600 mt-1">Back document uploaded: {documentBackFileId}</p>}
-      </div>
+      <FileUploadArea
+        id="documentBack"
+        label="Document Back (Optional, e.g., for ID cards)"
+        currentFile={documentBackFile}
+        currentFileId={documentBackFileId}
+        progress={uploadProgressBack}
+        onFileChange={(e) => handleFileChange(e, 'back')}
+        accept={ALLOWED_FILE_TYPES_FOR_KYC.join(',')}
+        helpText={`PNG, JPG, PDF up to ${MAX_FILE_SIZE_MB}MB.`}
+        uploadedTextPrefix="Back Document ID"
+      />
 
-      <div className="flex justify-between">
-        <button type="button" onClick={onBack} className="px-6 py-2 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+      <div className="flex justify-between pt-4">
+        <button type="button" onClick={onBack} className="px-6 py-2 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm text-base font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
           Back
         </button>
-        <button type="submit" className="px-6 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-          disabled={uploadProgressFront > 0 && uploadProgressFront < 100 || uploadProgressBack > 0 && uploadProgressBack < 100}
+        <button type="submit" className="px-6 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          disabled={(uploadProgressFront > 0 && uploadProgressFront < 100) || (uploadProgressBack > 0 && uploadProgressBack < 100)}
         >
-          {(uploadProgressFront > 0 && uploadProgressFront < 100) || (uploadProgressBack > 0 && uploadProgressBack < 100) ? 'Uploading...' : 'Next: Review'}
+          {(uploadProgressFront > 0 && uploadProgressFront < 100) || (uploadProgressBack > 0 && uploadProgressBack < 100) ? 'Uploading...' : 'Next: Review & Submit'}
         </button>
       </div>
     </form>

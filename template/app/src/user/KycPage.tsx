@@ -31,13 +31,21 @@ export default function KycPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<KycFormData>({});
 
+  const steps = ["Personal Details", "Document Details", "Document Upload", "Review & Submit"];
+
   const handleNextStep = (dataFromStep: Partial<KycFormData>) => {
     setFormData((prev) => ({ ...prev, ...dataFromStep }));
     setCurrentStep((prev) => prev + 1);
   };
 
   const handlePrevStep = () => {
-    setCurrentStep((prev) => prev - 1);
+    setCurrentStep((prev) => Math.max(1, prev - 1)); // Ensure step doesn't go below 1
+  };
+
+  const goToStep = (stepNumber: number) => {
+    if (stepNumber >= 1 && stepNumber <= steps.length) {
+      setCurrentStep(stepNumber);
+    }
   };
 
   const handleSubmitKyc = async () => {
@@ -75,19 +83,54 @@ export default function KycPage() {
   };
 
   return (
-    <div className='py-10 lg:mt-10'>
-      <div className='mx-auto max-w-3xl px-6 lg:px-8'>
-        <div className='mx-auto text-center'>
-          <h2 className='mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl dark:text-white'>
-            Verify Your Identity (KYC)
-          </h2>
-          <p className='mx-auto mt-6 max-w-2xl text-center text-lg leading-8 text-gray-600 dark:text-white'>
+    <div className='py-10 lg:py-16 bg-slate-50 dark:bg-gray-900 min-h-screen'> {/* Added bg and min-h */}
+      <div className='mx-auto max-w-2xl px-4 sm:px-6 lg:px-8'> {/* Adjusted max-w and px */}
+        <div className='text-center mb-10'> {/* Added mb for spacing */}
+          <h1 className='text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl'>
+            Verify Your Identity
+          </h1>
+          <p className='mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300'>
             Please provide the following information to complete your identity verification.
           </p>
         </div>
 
-        <div className='my-8 border rounded-3xl border-gray-900/10 dark:border-gray-100/10 p-6 sm:p-10'>
-          {/* Progress Bar (Optional but Recommended) */}
+        <div className='bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 sm:p-10'> {/* Enhanced card style */}
+          {/* Progress Bar */}
+          <div className="mb-8">
+            <ol className="flex items-center w-full">
+              {steps.map((stepName, index) => {
+                const stepNumber = index + 1;
+                const isActive = stepNumber === currentStep;
+                const isCompleted = stepNumber < currentStep;
+
+                return (
+                  <li
+                    key={stepName}
+                    className={`flex w-full items-center ${
+                      stepNumber < steps.length ? "after:content-[''] after:w-full after:h-1 after:border-b after:border-gray-300 dark:after:border-gray-600 after:inline-block" : ""
+                    } ${isCompleted ? "text-blue-600 dark:text-blue-500 after:border-blue-600 dark:after:border-blue-500" : ""} ${isActive ? "text-blue-600 dark:text-blue-500" : "text-gray-500 dark:text-gray-400"}`}
+                  >
+                    <span
+                      className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full shrink-0 ${
+                        isActive ? "bg-blue-600 text-white dark:bg-blue-500" : isCompleted ? "bg-blue-600 text-white dark:bg-blue-500" : "bg-gray-200 dark:bg-gray-700"
+                      } mr-2 sm:mr-4`}
+                    >
+                      {isCompleted ? (
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                        </svg>
+                      ) : (
+                        <span className="text-sm sm:text-base">{stepNumber}</span>
+                      )}
+                    </span>
+                    <span className={`text-xs sm:text-sm hidden md:inline-block ${isActive || isCompleted ? 'font-medium' : ''}`}>
+                      {stepName}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
           {/* <div>Step {currentStep} of 4</div> */}
 
           {currentStep === 1 && (
@@ -100,21 +143,18 @@ export default function KycPage() {
             <KycStep3_DocumentUpload initialData={formData} onNext={handleNextStep} onBack={handlePrevStep} />
           )}
           {currentStep === 4 && (
-            <KycStep4_Review formData={formData} onSubmit={handleSubmitKyc} onBack={handlePrevStep} />
+            <KycStep4_Review formData={formData} onSubmit={handleSubmitKyc} onBack={handlePrevStep} goToStep={goToStep} />
           )}
 
-          {/* The navigation is now handled within each step component */}
-          {/* Example: Final submit button is in KycStep4_Review */}
-          {/* Back buttons are in steps 2, 3, 4 */}
-          {/* Next buttons are in steps 1, 2, 3 */}
-
-          {/* Message if trying to submit too early (handled by disabling submit in Step 4 or here if needed) */}
           {currentStep !== 4 && (
-            <p className='mt-4 text-sm text-center text-gray-500 dark:text-gray-400'>
+            <p className='mt-6 text-sm text-center text-gray-500 dark:text-gray-400'>
               Please complete all steps to submit your KYC information.
             </p>
           )}
         </div>
+        <p className='mt-8 text-center text-xs text-gray-500 dark:text-gray-400'>
+          We handle your information securely and with confidentiality.
+        </p>
       </div>
     </div>
   );
