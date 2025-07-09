@@ -11,6 +11,8 @@ type Step1Errors = {
   dateOfBirth?: string;
   addressStreet?: string;
   addressCity?: string;
+  addressState?: string;
+  addressPostalCode?: string;
   addressCountry?: string;
   general?: string;
 };
